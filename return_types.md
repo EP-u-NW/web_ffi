@@ -18,4 +18,4 @@ Allowed return types for functions used as type parameter in [`NativeFunctionPoi
 * `Pointer<Opaque>`, `Pointer<Pointer<Opaque>>`
 * `Pointer<Void>`, `Pointer<Pointer<Void>>`
 * `Pointer<NativeFunction<dynamic>>`, `Pointer<Pointer<NativeFunction<dynamic>>>`
-* `Pointer<MyOpaque>`, `Pointer<Pointer<MyOpaque>>` where `MyOpaque` is a class extending `Opaque` and was registered before using [`registerOpaqueType<MyOpaque>()`](https://pub.dev/documentation/web_ffi/latest/web_ffi/registerOpaqueType.html)  
+* `Pointer<MyOpaque>`, `Pointer<Pointer<MyOpaque>>` where `MyOpaque` is a class extending `Opaque` and was registered before using [`registerOpaqueType<MyOpaque>()`](https://pub.dev/documentation/web_ffi/latest/web_ffi_modules/registerOpaqueType.html)  

@@ -105,11 +105,11 @@ DynamicLibrary openOpus() {
 ```
 
 ### 4.2 For web platforms
-Before we can go on actually initalize our [`Module`](https://pub.dev/documentation/web_ffi/latest/web_ffi/Module-class.html) in dart, we need to include `libopus.wasm` and `libopus.js` in our project. There are several ways to do that. First we will discuss the theoretical background. Than you can decide if you want to follow our sample to include the files or know a way that is more suited for your project.
+Before we can go on actually initalize our [`Module`](https://pub.dev/documentation/web_ffi/latest/web_ffi_modules/Module-class.html) in dart, we need to include `libopus.wasm` and `libopus.js` in our project. There are several ways to do that. First we will discuss the theoretical background. Than you can decide if you want to follow our sample to include the files or know a way that is more suited for your project.
 `web_ffi` will bind against your web runtime, access the global JavaScript object and expect to find a property named `libopus`, which holds a function (the so called `module-function`) that takes one argument (we will refer to this argument as `arg0`). Usually, all this is already written in `libopus.js`, so we need to include that file. If the `module-function` is later called from inside dart, it will try to instantiate the actuall WebAssembly instance. Since we compiled with emscripten, the `module-function` follows the standard emscripten approaches to try to get `libopus.wasm`. This means it will firstly check if `arg0['wasmBinary']` contains the bytes of `libopus.wasm`, and if so, use them. If not it will try to access `libopus.wasm` via http(s) from the same site `libopus.js` is included in.
 
 #### 4.2.1 With flutter
-We don't want to alter the files flutter puts out after building, so we will include everyhing we need into the flutter app. For `libopus.js` and `libopus.wasm`, we include them as flutter assets, to later inject the JavaScript from the assets into the runtime, we use the [inject_js](https://pub.dev/packages/inject_js) plugin. Lastly, we will use the [`EmscriptenModule.compile()`](https://pub.dev/documentation/web_ffi/latest/web_ffi/EmscriptenModule/compile.html) function with bytes also loaded from the assets to use the `arg0['wasmBinary']` approach. So we need to update our `pubspec.yaml`:
+We don't want to alter the files flutter puts out after building, so we will include everyhing we need into the flutter app. For `libopus.js` and `libopus.wasm`, we include them as flutter assets, to later inject the JavaScript from the assets into the runtime, we use the [inject_js](https://pub.dev/packages/inject_js) plugin. Lastly, we will use the [`EmscriptenModule.compile()`](https://pub.dev/documentation/web_ffi/latest/web_ffi_modules/EmscriptenModule/compile.html) function with bytes also loaded from the assets to use the `arg0['wasmBinary']` approach. So we need to update our `pubspec.yaml`:
 ```yaml
 name: web_ffi_example_flutter
 publish_to: 'none'
@@ -194,7 +194,7 @@ Usually, if we are not using flutter we use `dart2js` what will output a JavaScr
     </body>
 </html>
 ```
-Then we will use the [`EmscriptenModule.process()`](https://pub.dev/documentation/web_ffi/latest/web_ffi/EmscriptenModule/process.html) function which will internally open the `module-function` with an `arg` without `wasmBinary` set, so the emscripten logic will fetch `libopus.wasm` automatically.
+Then we will use the [`EmscriptenModule.process()`](https://pub.dev/documentation/web_ffi/latest/web_ffi_modules/EmscriptenModule/process.html) function which will internally open the `module-function` with an `arg` without `wasmBinary` set, so the emscripten logic will fetch `libopus.wasm` automatically.
 Here is our `lib/src/init_web.dart`:
 ```dart
 // Notice that in this file, we import web_ffi and not proxy_ffi.dart

@@ -1,0 +1,19 @@
+name: web_ffi_example_flutter
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  inject_js: ^2.0.0
+  web_ffi:
+    path: ../..
+
+flutter:
+  assets:
+    - assets/libopus.js
+    - assets/libopus.wasm

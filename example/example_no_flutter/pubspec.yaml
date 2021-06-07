@@ -1,0 +1,11 @@
+name: web_ffi_example_no_flutter
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  web_ffi:
+    path: ../..

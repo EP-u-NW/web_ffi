@@ -1,3 +1,6 @@
+## [0.7.2]
+* Fixed errors related to unexpected `runtimeType` names due to minifying in release builds
+
 ## [0.7.1]
 * Fixing dead links
 

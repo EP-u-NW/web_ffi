@@ -5,6 +5,8 @@ import '../modules/module.dart';
 import '../modules/memory.dart';
 import '../modules/null_memory.dart';
 
+import '../internal/type_utils.dart';
+
 import '../../web_ffi_meta.dart';
 
 /// Represents a pointer into the native C memory corresponding to "NULL",
@@ -23,7 +25,7 @@ final Pointer<Never> nullptr = new Pointer<Never>._null();
 /// before [Memory.init()] was called or else an exception will be thrown.
 int sizeOf<T extends NativeType>() {
   int? size;
-  if (_isPointerType<T>()) {
+  if (isPointerType<T>()) {
     size = sizeMap[IntPtr];
   } else {
     size = sizeMap[T];
@@ -35,16 +37,8 @@ int sizeOf<T extends NativeType>() {
   }
 }
 
-bool _isPointerType<T extends NativeType>() =>
-    T.toString().startsWith('Pointer<');
-
-bool _isNativeFunctionType<T extends NativeType>() =>
-    T.toString().startsWith('NativeFunction<');
-
-bool _isVoidType<T extends NativeType>() => T.toString() == 'Void';
-
 bool _isUnsizedType<T extends NativeType>() {
-  return _isNativeFunctionType<T>() || _isVoidType<T>();
+  return isNativeFunctionType<T>() || isVoidType<T>();
 }
 
 /// [NativeType]'s subtypes represent a native type in C.
@@ -307,7 +301,7 @@ class DynamicLibrary {
   /// the return type and parameters of `T` match the wasm function.
   Pointer<T> lookup<T extends NativeType>(String name) {
     WasmSymbol symbol = symbolByName(boundMemory, name);
-    if (_isNativeFunctionType<T>()) {
+    if (isNativeFunctionType<T>()) {
       if (symbol is FunctionDescription) {
         return new Pointer<T>.fromAddress(symbol.tableIndex, boundMemory);
       } else {

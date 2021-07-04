@@ -1,5 +1,5 @@
 name: web_ffi
-version: 0.7.1
+version: 0.7.2
 repository: https://github.com/EPNW/web_ffi/
 description: Translates dart:ffi calls on the web to WebAssembly using dart:js
 

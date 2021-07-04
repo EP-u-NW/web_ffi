@@ -4,10 +4,11 @@ import '../ffi/types.dart';
 import '../modules/exceptions.dart';
 import '../modules/memory.dart';
 import 'invoker_generated.dart';
+import 'type_utils.dart';
 
 // Called from the invokers
 T execute<T>(Function base, List<Object> args, Memory memory) {
-  if (T == _void) {
+  if (T == DartVoidType) {
     Function.apply(base, args.map(_toJsType).toList());
     return null as T;
   } else {
@@ -34,7 +35,7 @@ Object _toJsType(Object dartObject) {
 
 InvokeHelper _inferFromSignature(String signature) {
   String returnType = signature.split('=>').last.trim();
-  if (returnType.startsWith('Pointer<Pointer<Pointer<')) {
+  if (returnType.startsWith(pointerPointerPointerPrefix)) {
     throw new MarshallingException(
         'Nesting pointers is only supported to a deepth of 2!' +
             '\nThis means that you can write Pointer<Pointer<X>> but not Pointer<Pointer<Pointer<X>>>, ...');
@@ -43,7 +44,7 @@ InvokeHelper _inferFromSignature(String signature) {
   if (h != null) {
     return h;
   } else {
-    if (returnType.startsWith('Pointer<NativeFunction<')) {
+    if (returnType.startsWith(pointerNativeFunctionPrefix)) {
       throw new MarshallingException(
           'Using pointers to native functions as return type is only allowed if the type of the native function is dynamic!' +
               '\nThis means that only Pointer<NativeFunction<dynamic>> is allowed!');
@@ -59,25 +60,22 @@ List<String> listKnownTypes() =>
     new List<String>.of(_knownTypes.keys, growable: false);
 
 final Map<String, InvokeHelper> _knownTypes = {
-  _typeString<int>(): new InvokeHelper<int>(null, null),
-  _typeString<double>(): new InvokeHelper<double>(null, null),
-  _typeString<bool>(): new InvokeHelper<bool>(null, null),
-  _typeString<void>(): new InvokeHelper<void>(null, null)
+  typeString<int>(): new InvokeHelper<int>(null, null),
+  typeString<double>(): new InvokeHelper<double>(null, null),
+  typeString<bool>(): new InvokeHelper<bool>(null, null),
+  typeString<void>(): new InvokeHelper<void>(null, null)
 };
 
-String _typeString<T>() => T.toString();
-
 void registerNativeMarshallerType<T extends NativeType>() {
-  String t = _typeString<T>();
-  _knownTypes['Pointer<$t>'] = new InvokeHelper<Pointer<T>>(null, null);
-  _knownTypes['Pointer<Pointer<$t>>'] =
+  _knownTypes[typeString<Pointer<T>>()] =
+      new InvokeHelper<Pointer<T>>(null, null);
+  _knownTypes[typeString<Pointer<Pointer<T>>>()] =
       new InvokeHelper<Pointer<Pointer<T>>>(null, null);
 }
 
 void registerNativeMarshallerOpaque<T extends Opaque>() {
-  String t = _typeString<T>();
-  _knownTypes['Pointer<$t>'] = new OpaqueInvokeHelper<T>(null, null);
-  _knownTypes['Pointer<Pointer<$t>>'] =
+  _knownTypes[typeString<Pointer<T>>()] = new OpaqueInvokeHelper<T>(null, null);
+  _knownTypes[typeString<Pointer<Pointer<T>>>()] =
       new OpaqueInvokeHelperSquare<T>(null, null);
 }
 
@@ -101,164 +99,164 @@ T _toDartType<T>(Object o, Memory bind) {
       throw new MarshallingException.typeMissmatch(T, o);
     }
   } else {
-    if (T == _Pointer_Void) {
+    if (T == Pointer_Void) {
       if (o is int) {
         return new Pointer<Void>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_IntPtr) {
+    } else if (T == Pointer_IntPtr) {
       if (o is int) {
         return new Pointer<IntPtr>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Int8) {
+    } else if (T == Pointer_Int8) {
       if (o is int) {
         return new Pointer<Int8>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Int16) {
+    } else if (T == Pointer_Int16) {
       if (o is int) {
         return new Pointer<Int16>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Int32) {
+    } else if (T == Pointer_Int32) {
       if (o is int) {
         return new Pointer<Int32>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Int64) {
+    } else if (T == Pointer_Int64) {
       if (o is int) {
         return new Pointer<Int64>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Double) {
+    } else if (T == Pointer_Double) {
       if (o is int) {
         return new Pointer<Double>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Uint8) {
+    } else if (T == Pointer_Uint8) {
       if (o is int) {
         return new Pointer<Uint8>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Uint16) {
+    } else if (T == Pointer_Uint16) {
       if (o is int) {
         return new Pointer<Uint16>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Uint32) {
+    } else if (T == Pointer_Uint32) {
       if (o is int) {
         return new Pointer<Uint32>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Uint64) {
+    } else if (T == Pointer_Uint64) {
       if (o is int) {
         return new Pointer<Uint64>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Float) {
+    } else if (T == Pointer_Float) {
       if (o is int) {
         return new Pointer<Float>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_Opaque) {
+    } else if (T == Pointer_Opaque) {
       if (o is int) {
         return new Pointer<Opaque>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
-    } else if (T == _Pointer_NativeFunction_dynamic) {
+    } else if (T == Pointer_NativeFunction_dynamic) {
       if (o is int) {
         return new Pointer<NativeFunction<dynamic>>.fromAddress(o, bind) as T;
       } else {
         throw new MarshallingException.noAddress(o);
       }
     } else {
-      if (T == _Pointer_Pointer_Void) {
+      if (T == Pointer_Pointer_Void) {
         if (o is int) {
           return new Pointer<Pointer<Void>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_IntPtr) {
+      } else if (T == Pointer_Pointer_IntPtr) {
         if (o is int) {
           return new Pointer<Pointer<IntPtr>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Int8) {
+      } else if (T == Pointer_Pointer_Int8) {
         if (o is int) {
           return new Pointer<Pointer<Int8>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Int16) {
+      } else if (T == Pointer_Pointer_Int16) {
         if (o is int) {
           return new Pointer<Pointer<Int16>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Int32) {
+      } else if (T == Pointer_Pointer_Int32) {
         if (o is int) {
           return new Pointer<Pointer<Int32>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Int64) {
+      } else if (T == Pointer_Pointer_Int64) {
         if (o is int) {
           return new Pointer<Pointer<Int64>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Double) {
+      } else if (T == Pointer_Pointer_Double) {
         if (o is int) {
           return new Pointer<Pointer<Double>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Uint8) {
+      } else if (T == Pointer_Pointer_Uint8) {
         if (o is int) {
           return new Pointer<Pointer<Uint8>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Uint16) {
+      } else if (T == Pointer_Pointer_Uint16) {
         if (o is int) {
           return new Pointer<Pointer<Uint16>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Uint32) {
+      } else if (T == Pointer_Pointer_Uint32) {
         if (o is int) {
           return new Pointer<Pointer<Uint32>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Uint64) {
+      } else if (T == Pointer_Pointer_Uint64) {
         if (o is int) {
           return new Pointer<Pointer<Uint64>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Float) {
+      } else if (T == Pointer_Pointer_Float) {
         if (o is int) {
           return new Pointer<Pointer<Float>>.fromAddress(o, bind) as T;
         } else {
           throw new MarshallingException.noAddress(o);
         }
-      } else if (T == _Pointer_Pointer_Opaque) {
+      } else if (T == Pointer_Pointer_Opaque) {
         if (o is int) {
           return new Pointer<Pointer<Opaque>>.fromAddress(o, bind) as T;
         } else {
@@ -271,35 +269,3 @@ T _toDartType<T>(Object o, Memory bind) {
     }
   }
 }
-
-/// Hacky workadround, see https://github.com/dart-lang/language/issues/123
-Type _extractType<T>() => T;
-final Type _Pointer_IntPtr = _extractType<Pointer<IntPtr>>();
-final Type _Pointer_Void = _extractType<Pointer<Void>>();
-final Type _Pointer_Int8 = _extractType<Pointer<Int8>>();
-final Type _Pointer_Int16 = _extractType<Pointer<Int16>>();
-final Type _Pointer_Int32 = _extractType<Pointer<Int32>>();
-final Type _Pointer_Int64 = _extractType<Pointer<Int64>>();
-final Type _Pointer_Double = _extractType<Pointer<Double>>();
-final Type _Pointer_Uint8 = _extractType<Pointer<Uint8>>();
-final Type _Pointer_Uint16 = _extractType<Pointer<Uint16>>();
-final Type _Pointer_Uint32 = _extractType<Pointer<Uint32>>();
-final Type _Pointer_Uint64 = _extractType<Pointer<Uint64>>();
-final Type _Pointer_Float = _extractType<Pointer<Float>>();
-final Type _Pointer_Opaque = _extractType<Pointer<Opaque>>();
-final Type _Pointer_Pointer_IntPtr = _extractType<Pointer<Pointer<IntPtr>>>();
-final Type _Pointer_Pointer_Void = _extractType<Pointer<Pointer<Void>>>();
-final Type _Pointer_Pointer_Int8 = _extractType<Pointer<Pointer<Int8>>>();
-final Type _Pointer_Pointer_Int16 = _extractType<Pointer<Pointer<Int16>>>();
-final Type _Pointer_Pointer_Int32 = _extractType<Pointer<Pointer<Int32>>>();
-final Type _Pointer_Pointer_Int64 = _extractType<Pointer<Pointer<Int64>>>();
-final Type _Pointer_Pointer_Double = _extractType<Pointer<Pointer<Double>>>();
-final Type _Pointer_Pointer_Uint8 = _extractType<Pointer<Pointer<Uint8>>>();
-final Type _Pointer_Pointer_Uint16 = _extractType<Pointer<Pointer<Uint16>>>();
-final Type _Pointer_Pointer_Uint32 = _extractType<Pointer<Pointer<Uint32>>>();
-final Type _Pointer_Pointer_Uint64 = _extractType<Pointer<Pointer<Uint64>>>();
-final Type _Pointer_Pointer_Float = _extractType<Pointer<Pointer<Float>>>();
-final Type _Pointer_Pointer_Opaque = _extractType<Pointer<Pointer<Opaque>>>();
-final Type _Pointer_NativeFunction_dynamic =
-    _extractType<Pointer<NativeFunction<dynamic>>>();
-final Type _void = _extractType<void>();

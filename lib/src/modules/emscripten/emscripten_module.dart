@@ -19,6 +19,7 @@ class _EmscriptenModuleJs {
   external Uint8List? get wasmBinary;
   external Uint8List? get HEAPU8;
   external Object? get asm;
+  external Object? get wasmExports;
 
   // Must have an unnamed factory constructor with named arguments.
   external factory _EmscriptenModuleJs({Uint8List wasmBinary});
@@ -108,13 +109,13 @@ class EmscriptenModule extends Module {
       this._emscriptenModuleJs, this._exports, this._malloc, this._free);
 
   factory EmscriptenModule._fromJs(_EmscriptenModuleJs module) {
-    Object? asm = module.asm;
-    if (asm != null) {
+    final wasmExports = module.wasmExports ?? module.asm;
+    if (wasmExports != null) {
       Map<int, WasmSymbol> knownAddresses = {};
       _Malloc? malloc;
       _Free? free;
       List<WasmSymbol> exports = [];
-      List? entries = _entries(asm);
+      List? entries = _entries(wasmExports);
       if (entries != null) {
         for (dynamic entry in entries) {
           if (entry is List) {
